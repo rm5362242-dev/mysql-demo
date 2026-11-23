@@ -1,50 +1,370 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MySQL demo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ismingizni qoldiring</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 40px auto; padding: 0 16px; }
-    input { padding: 8px; width: 60%; }
-    button { padding: 8px 14px; }
-    li { margin: 6px 0; }
-    small { color: #666; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #5ba4e5 0%, #9fd3f7 52%, #dff2fe 100%);
+      color: #1e293b;
+      position: relative;
+      overflow-x: hidden;
+      padding: 28px 16px 190px;
+    }
+
+    /* Suzib yurgan bulutlar */
+    .sky-clouds {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      filter: drop-shadow(0 8px 16px rgba(30, 64, 175, 0.08));
+      animation: drift linear infinite;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 50%;
+    }
+
+    .cloud.c1 {
+      width: 130px;
+      height: 42px;
+      top: 8%;
+      left: -160px;
+      animation-duration: 38s;
+    }
+    .cloud.c1::before { width: 54px; height: 54px; top: -24px; left: 20px; }
+    .cloud.c1::after { width: 66px; height: 66px; top: -30px; right: 20px; }
+
+    .cloud.c2 {
+      width: 170px;
+      height: 52px;
+      top: 22%;
+      left: -200px;
+      opacity: 0.78;
+      animation-duration: 52s;
+      animation-delay: -14s;
+    }
+    .cloud.c2::before { width: 68px; height: 68px; top: -30px; left: 28px; }
+    .cloud.c2::after { width: 82px; height: 82px; top: -38px; right: 24px; }
+
+    .cloud.c3 {
+      width: 115px;
+      height: 36px;
+      top: 44%;
+      left: -150px;
+      opacity: 0.7;
+      animation-duration: 44s;
+      animation-delay: -25s;
+    }
+    .cloud.c3::before { width: 46px; height: 46px; top: -20px; left: 18px; }
+    .cloud.c3::after { width: 56px; height: 56px; top: -25px; right: 16px; }
+
+    @keyframes drift {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(100vw + 260px)); }
+    }
+
+    /* Pastki tog'lar */
+    .mountains {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 170px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .mountains svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Asosiy oyna */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 26px;
+      padding: 24px 20px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      text-align: center;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.92rem;
+      color: #475569;
+      margin-bottom: 18px;
+    }
+
+    .form-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 0.98rem;
+      background: #ffffff;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.16);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+      transition: transform 0.12s, opacity 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      min-height: 20px;
+      text-align: center;
+      font-weight: 600;
+      color: #0369a1;
+    }
+
+    /* Bulutcha ko'rinishidagi yozuvlar */
+    .entries {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bubble-card {
+      position: relative;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 15px 18px;
+      border: 1.5px solid #e0f2fe;
+      box-shadow: 0 10px 24px rgba(14, 116, 144, 0.12);
+    }
+
+    .bubble-card::after {
+      content: "";
+      position: absolute;
+      bottom: -9px;
+      left: 26px;
+      width: 18px;
+      height: 18px;
+      background: #ffffff;
+      border-right: 1.5px solid #e0f2fe;
+      border-bottom: 1.5px solid #e0f2fe;
+      transform: rotate(45deg);
+    }
+
+    .author {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #0f172a;
+    }
+
+    .comment-text {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: #334155;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .time-text {
+      margin-top: 8px;
+      display: block;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #475569;
+      font-size: 0.92rem;
+      padding: 12px;
+    }
   </style>
 </head>
 <body>
-  <h1>Ismingizni qoldiring</h1>
-  <input id="name" placeholder="Ism" maxlength="100">
-  <button onclick="add()">Saqlash</button>
-  <ul id="list"></ul>
+  <div class="sky-clouds" aria-hidden="true">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
 
-<script>
-const API = "/.netlify/functions/api";
+  <div class="mountains" aria-hidden="true">
+    <svg viewBox="0 0 1440 260" preserveAspectRatio="none">
+      <path fill="#60a5fa" d="M0,170 L210,75 L410,165 L640,55 L890,160 L1150,70 L1440,155 L1440,260 L0,260 Z" opacity="0.55"></path>
+      <path fill="#2563eb" d="M0,210 L170,115 L360,205 L590,95 L830,205 L1090,105 L1310,195 L1440,130 L1440,260 L0,260 Z" opacity="0.72"></path>
+      <path fill="#1e3a8a" d="M0,245 L140,165 L320,235 L520,145 L760,240 L1020,150 L1260,235 L1440,175 L1440,260 L0,260 Z"></path>
+    </svg>
+  </div>
 
-async function load() {
-  const rows = await (await fetch(API)).json();
-  const ul = document.getElementById("list");
-  ul.innerHTML = "";
-  rows.forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = r.name + " ";
-    const s = document.createElement("small");
-    s.textContent = "(" + new Date(r.created_at).toLocaleString() + ")";
-    li.appendChild(s);
-    ul.appendChild(li);
-  });
-}
+  <div class="container">
+    <div class="card">
+      <h1>Ismingizni qoldiring</h1>
+      <p class="subtitle">Tog‘ va bulutlar orasida izohingizni qoldiring</p>
 
-async function add() {
-  const input = document.getElementById("name");
-  const name = input.value.trim();
-  if (!name) return;
-  await fetch(API, { method: "POST", body: JSON.stringify({ name }) });
-  input.value = "";
-  load();
-}
+      <div class="form-box">
+        <input id="name" type="text" placeholder="Ismingiz" maxlength="100" />
+        <textarea id="comment" placeholder="Izohingiz (ixtiyoriy)" maxlength="300"></textarea>
+        <button id="saveBtn" onclick="addEntry()">Saqlash</button>
+      </div>
 
-load();
-</script>
+      <div id="status"></div>
+      <div id="list" class="entries"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = "/.netlify/functions/api";
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    async function load() {
+      const list = document.getElementById("list");
+      try {
+        const res = await fetch(API);
+        const rows = await res.json();
+        list.innerHTML = "";
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          list.innerHTML = '<div class="empty-msg">Hali yozuvlar yo‘q. Birinchi bo‘lib ism qoldiring!</div>';
+          return;
+        }
+
+        rows.forEach((r) => {
+          const card = document.createElement("div");
+          card.className = "bubble-card";
+
+          const nameHtml = `<div class="author">${escapeHtml(r.name)}</div>`;
+          const commentVal = r.comment || r.note || r.message || "";
+          const commentHtml = commentVal
+            ? `<div class="comment-text">${escapeHtml(commentVal)}</div>`
+            : "";
+          const dateStr = r.created_at ? new Date(r.created_at).toLocaleString() : "";
+          const timeHtml = dateStr ? `<small class="time-text">${escapeHtml(dateStr)}</small>` : "";
+
+          card.innerHTML = nameHtml + commentHtml + timeHtml;
+          list.appendChild(card);
+        });
+      } catch (err) {
+        list.innerHTML = '<div class="empty-msg">Ro‘yxatni yuklashda xatolik bo‘ldi.</div>';
+      }
+    }
+
+    async function addEntry() {
+      const nameInput = document.getElementById("name");
+      const commentInput = document.getElementById("comment");
+      const statusEl = document.getElementById("status");
+      const btn = document.getElementById("saveBtn");
+
+      const name = nameInput.value.trim();
+      const comment = commentInput.value.trim();
+
+      if (!name) {
+        statusEl.style.color = "#dc2626";
+        statusEl.textContent = "Avval ismingizni yozing.";
+        return;
+      }
+
+      btn.disabled = true;
+      statusEl.style.color = "#0369a1";
+      statusEl.textContent = "Saqlanmoqda...";
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, comment })
+        });
+
+        if (!res.ok) {
+          throw new Error("Server error");
+        }
+
+        nameInput.value = "";
+        commentInput.value = "";
+        statusEl.style.color = "#15803d";
+        statusEl.textContent = "Muvaffaqiyatli saqlandi!";
+        await load();
+      } catch (err) {
+        statusEl.style.color = "#dc2626";
+        statusEl.textContent = "Saqlashda xatolik yuz berdi.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    load();
+  </script>
 </body>
 </html>
